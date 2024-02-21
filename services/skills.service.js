@@ -3,6 +3,7 @@ import { getUser } from "./users.service.js"
 
 export const isValidSkills = (skills) => {
     if (skills.length == 0) return false
+    //checks that for each skill, theres a name and rating
     for (let i in skills) {
         if (!(skills[i].skill && skills[i].rating)) {
             return false
@@ -20,6 +21,9 @@ export const createSkill = (skill) => {
         ON CONFLICT (name)
         DO UPDATE SET frequency = frequency + 1
     `
+
+    //if skill already exists, then it updates frequency
+    //else: creates the skill
 
     return new Promise((resolve, reject) => {
         db.run(SQL, [skill, 1], (err) => {
@@ -64,9 +68,8 @@ export const getFilteredSkills = (min, max) => {
     })
 }
 
-//updates skill counter
 export const decreaseSkillCount = (skill) => {
-    //count == 1 or count == -1
+    //decreases frequency of skill by 1
     const SQL = `
         UPDATE skills SET frequency = frequency - 1 WHERE name = ?
     `
@@ -74,6 +77,7 @@ export const decreaseSkillCount = (skill) => {
     return new Promise((resolve, reject) => {
         db.run(SQL, [skill], (err) => {
             if (err) reject(err)
+            //checks if frequency reached 0 => delete the skill
             resolve(checkAndDeleteSkill(skill))
         })
     })
@@ -94,17 +98,19 @@ export const checkAndDeleteSkill = (skill) => {
 }
 
 export const compareAndUpdateSkills = async (email, skills) => {
+    //looks at updated skills and old skills
+    //updates skill frequency
     const user = await getUser(email)
 
     if (!user) {
-        throw new Error('User not found or user has no skills');
+        throw new Error('User not found');
     }
 
     const oldSkills = JSON.parse(user.skills)
 
     const oldSkillsMap = {}
     const newSkillsMap = {}
-
+    
     for (let i in oldSkills) {
         oldSkillsMap[oldSkills[i].skill] = 1
     }

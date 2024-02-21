@@ -4,6 +4,7 @@ import createSkillFrequencyTable from "./models/skills.js";
 
 import userRoute from "./routes/users.js"
 import skillRoute from "./routes/skills.js"
+import seedRoute from "./routes/seed.js"
 
 const port = process.env.PORT || 3000;
 
@@ -24,13 +25,10 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use('/users', userRoute)
 app.use('/skills', skillRoute)
-
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+app.use('/seed', seedRoute)
 
 app.listen(port, () => {
   console.log(`Example REST Express app listening at http://localhost:${port}`);
 });
 
-
+export default app
