@@ -1,4 +1,5 @@
 import db from '../database.js'
+import { compareAndUpdateSkills, createSkill, isValidSkills } from './skills.service.js'
 
 export const getUsers = () => {
     const SQL = `SELECT * FROM users`
@@ -28,6 +29,7 @@ export const getUser = (email) => {
     })
 }
 
+//TODO: Finish updating skills when creating a user
 export const createUser = (data) => {
     const name = data.name
     const company = data.company
@@ -48,30 +50,57 @@ export const createUser = (data) => {
     `
 
     //check skill validity
+    if (!isValidSkills(skills)) {
+        throw new Error("Skill input is invalid")
+    }
 
     //update skills
+    for (let i in skills) {
+        createSkill(skills[i].skill)
+    }
 
     return new Promise((resolve, reject) => {
-        db.run(SQL, [name, company, email, phone, skills], (err) => {
+        db.run(SQL, [name, company, email, phone, JSON.stringify(skills)], (err) => {
             if (err) reject("An error has occured")
             resolve(`User ${name} has successfully been created!`)
         })
     })
 }
 
-export const updateUser = (data) => {
+export const updateUser = async (data) => {
     //add skill/frequency to skills db
+    const {email, ...updatedData} = data
+    const skills = updatedData.skills
 
-    //how to delete skill?
-    //update + delete field for skill?
-    /**
-     * {
-     *    skills: {
-     *      update: [] //check if exists
-     *      delete: [] //check if exists
-     *    }
-     * }
-     */
+    if (skills && isValidSkills(skills)) {
+        compareAndUpdateSkills(email, skills)
+    } else {
+        throw new Error("Bad skill input")
+    }
+    
+    const setKeys = []
+    const setValues = []
+
+    for (let key in updatedData) {
+        if (key == 'skills') {
+            setValues.push(JSON.stringify(skills))
+        } else {
+            setValues.push(updatedData[key])
+        }
+        setKeys.push(`${key} = ?`);
+    }
+   
+    setValues.push(email)
+    const SQL_keys = setKeys.join(', ')
+
+    const SQL = `UPDATE users SET ${SQL_keys} WHERE email = ?`
+
+    return new Promise((resolve, reject) => {
+        db.run(SQL, setValues, (err) => {
+            if (err) reject(err)
+            resolve(`Updated ${email}!`)
+        })
+    })
 }
 
 export const deleteUser = (user) => { //assume there was authorization
