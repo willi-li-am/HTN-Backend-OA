@@ -15,10 +15,10 @@ export const isValidSkills = (skills) => {
 export const createSkill = (skill) => {
     const SQL = `
         INSERT INTO skills
-        (name, frequency)
+        (skill, frequency)
         VALUES
         (?, ?)
-        ON CONFLICT (name)
+        ON CONFLICT (skill)
         DO UPDATE SET frequency = frequency + 1
     `
 
@@ -71,7 +71,7 @@ export const getFilteredSkills = (min, max) => {
 export const decreaseSkillCount = (skill) => {
     //decreases frequency of skill by 1
     const SQL = `
-        UPDATE skills SET frequency = frequency - 1 WHERE name = ?
+        UPDATE skills SET frequency = frequency - 1 WHERE skill = ?
     `
 
     return new Promise((resolve, reject) => {
@@ -85,7 +85,7 @@ export const decreaseSkillCount = (skill) => {
 
 export const checkAndDeleteSkill = (skill) => {
     const checkAndDeleteSQL = `
-        DELETE FROM skills WHERE name = ? AND frequency <= 0
+        DELETE FROM skills WHERE skill = ? AND frequency <= 0
     `;
 
     //if count reaches 0, delete the skill

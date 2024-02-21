@@ -6,7 +6,7 @@ const createSkillFrequencyTable = () => {
         CREATE TABLE IF NOT EXISTS
         skills (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE NOT NULL,
+            skill TEXT UNIQUE NOT NULL,
             frequency NUMBER NOT NULL
         )
     `
