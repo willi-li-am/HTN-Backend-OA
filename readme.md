@@ -1,12 +1,16 @@
 # William Li Hack the North Backend Challenge
 ## API endpoints
 Base path: ```http://localhost:PORT/ ``` PORT = 3000 by default
+
 No auth required for any request (didn't implement)
+
 Email is what identifies a user
 ### User Endpoints: 
 #### Get all users
 ```GET '/users'```
+
 Retrieves information on all users
+
 ```
 [
   {
@@ -39,7 +43,9 @@ Retrieves information on all users
 ```
 #### Single user search
 ```GET '/users/:email'```
+
 Retrieves user info associated to email
+
 ```
 Example: GET '/users/someone@example.com'
 {
@@ -103,7 +109,9 @@ Example flow:
 ### Skill Endpoints
 #### Get all skills
 ```GET '/skills'```
+
 Retrieves all skills with their frequency
+
 ```
 [
   {
@@ -120,17 +128,21 @@ Retrieves all skills with their frequency
 ```
 #### Get all skills with frequency filter
 ```GET '/skills/?min_frequency=x&max_frequency=y``` where x and y are int
+
 (same response as above but returns skills that match filter)
 
 ### Seed Data
 #### Wipe
 Wipes the whole database 🤯
+
 ```GET '/seed/wipe'```
 
 #### Populate
 Populates the database with given data
+
 ```GET '/seed/populate'```
 
 #### Reset
 Wipes the database, the populates the database with given data
+
 ```GET '/seed/reset'```
