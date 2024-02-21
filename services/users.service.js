@@ -7,13 +7,15 @@ export const getUsers = () => {
     return new Promise((resolve, reject) => {
         db.all(SQL, (err, rows) => {
             if (err) reject (err)
+            for (let i in rows) {
+                rows[i].skills = JSON.parse(rows[i].skills)
+            }
             resolve(rows)
         })
     })
 }
 
 export const getUser = (email) => {
-    //uses email as identifier
     const SQL = `
         SELECT *
         FROM users
@@ -24,12 +26,12 @@ export const getUser = (email) => {
         db.get(SQL, [email], (err, row) => {
             if (err) reject (err)
             if (row == undefined) reject("user not found")
+            row.skills = JSON.parse(row.skills)
             resolve(row)
         })
     })
 }
 
-//TODO: Finish updating skills when creating a user
 export const createUser = (data) => {
     const name = data.name
     const company = data.company
@@ -68,10 +70,10 @@ export const createUser = (data) => {
 }
 
 export const updateUser = async (data) => {
-    //add skill/frequency to skills db
     const {email, ...updatedData} = data
     const skills = updatedData.skills
 
+    //checks validity of skill input and +/- frequency accordingly
     if (skills && isValidSkills(skills)) {
         compareAndUpdateSkills(email, skills)
     } else {
@@ -89,10 +91,15 @@ export const updateUser = async (data) => {
         }
         setKeys.push(`${key} = ?`);
     }
+
+    if (setKeys.length == 0) {
+        reject("Nothing to update")
+    }
    
     setValues.push(email)
     const SQL_keys = setKeys.join(', ')
 
+    //sets all new data to be updated
     const SQL = `UPDATE users SET ${SQL_keys} WHERE email = ?`
 
     return new Promise((resolve, reject) => {
@@ -101,8 +108,4 @@ export const updateUser = async (data) => {
             resolve(`Updated ${email}!`)
         })
     })
-}
-
-export const deleteUser = (user) => { //assume there was authorization
-    //remove skills frequency from skills db
 }

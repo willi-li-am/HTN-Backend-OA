@@ -1,5 +1,6 @@
 import fetch from 'node-fetch'
 import fs from 'fs'
+import db from '../database.js'
 
 const getData = (path) => {
     return new Promise((resolve, reject) => {
@@ -39,7 +40,33 @@ const checkForDuplicateEmails = (jsonList) => {
     //These emails appear twice in the data given
 };
 
-const populateDB = async (filePath, backendUrl) => {
+export const wipeDB = async () => {
+    const tables = ["users", "skills"]
+    const deletePromises = tables.map(table => {
+        return new Promise((resolve, reject) => {
+            db.run(`DELETE FROM ${table}`, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    console.log(`Rows deleted from ${table}`);
+                    resolve(`Rows deleted from ${table}`);
+                }
+            });
+        });
+    });
+
+    return Promise.all(deletePromises)
+        .then((results) => {
+            console.log("Successfully wiped DB");
+            return "Successfully wiped DB";
+        })
+        .catch((error) => {
+            console.error("Error wiping DB:", error);
+            throw error; // Rethrow or handle error as appropriate
+        });
+}
+
+export const populateDB = async (filePath, backendUrl) => {
     const data = await getData(filePath)
     for (let i in data) {
         await createUser(data[i], backendUrl)
@@ -49,6 +76,7 @@ const populateDB = async (filePath, backendUrl) => {
     //checkForDuplicateEmails(data)
 }
 
-
-
-populateDB('./data.json', 'http://localhost:3000')
+export const resetDB = async (filePath, backendUrl) => {
+    wipeDB()
+        .then(() => {populateDB(filePath, backendUrl)})
+}
